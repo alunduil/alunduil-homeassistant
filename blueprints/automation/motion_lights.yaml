@@ -26,7 +26,7 @@ blueprint:
         number:
           min: 0
           max: 1000
-          unit_of_measuremnt: Lux
+          unit_of_measurement: Lux
           mode: box
 
     lights_off:
