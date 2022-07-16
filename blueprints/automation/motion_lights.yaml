@@ -106,6 +106,7 @@ action:
             seconds: 0
         - condition: state
           entity_id: !input lights_off
+          state: 'on'
       sequence:
         - delay: !input light_off_delay
         - service: light.turn_off
