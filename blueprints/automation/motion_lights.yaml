@@ -85,61 +85,61 @@ blueprint:
             domain: scene
 
 action:
-  trigger:
-    - platform: state
-      entity_id: !input motion_sensor
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 0
+  - trigger:
+      - platform: state
+        entity_id: !input motion_sensor
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
 
-  condition: []
+    condition: []
 
-  choose:
-    - conditions:
-        - condition: state
-          entity_id: !input motion_sensor
-          state: 'off'
-          for:
-            hours: 0
-            minutes: 0
-            seconds: 0
-        - condition: state
-          entity_id: !input lights_off
-      sequence:
-        - delay: !input light_off_delay
-        - service: light.turn_off
-          data:
-            transition: !input light_off_transition
-          target:
+    choose:
+      - conditions:
+          - condition: state
+            entity_id: !input motion_sensor
+            state: 'off'
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 0
+          - condition: state
             entity_id: !input lights_off
-    - conditions:
-        - condition: numeric_state
-          entity_id: !input luminance_sensor
-          below: '25'
-      sequence:
-        - choose:
-            - conditions:
-                - condition: not
-                  conditions:
-                    - condition: time
-                      after: !input bedtime
-                - condition: sun
-                  after: sunset
-                  after_offset: !input relax_time_after_sunset
-              sequence:
-                - service: hue.activate_scene
-                  data: {}
-                  target: !input relax_scenes
-            - conditions:
-                - condition: time
-                  after: !input wake_time
-              sequence:
-                - service: hue.activate_scene
-                  data: {}
-                  target: !input bright_scenes
-          default:
-            - service: hue.activate_scene
-              data: {}
-              target: !input night_scenes
-  default: []
+        sequence:
+          - delay: !input light_off_delay
+          - service: light.turn_off
+            data:
+              transition: !input light_off_transition
+            target:
+              entity_id: !input lights_off
+      - conditions:
+          - condition: numeric_state
+            entity_id: !input luminance_sensor
+            below: '25'
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: not
+                    conditions:
+                      - condition: time
+                        after: !input bedtime
+                  - condition: sun
+                    after: sunset
+                    after_offset: !input relax_time_after_sunset
+                sequence:
+                  - service: hue.activate_scene
+                    data: {}
+                    target: !input relax_scenes
+              - conditions:
+                  - condition: time
+                    after: !input wake_time
+                sequence:
+                  - service: hue.activate_scene
+                    data: {}
+                    target: !input bright_scenes
+            default:
+              - service: hue.activate_scene
+                data: {}
+                target: !input night_scenes
+    default: []
