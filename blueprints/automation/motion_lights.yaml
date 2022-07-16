@@ -19,6 +19,10 @@ blueprint:
           domain: sensor
           device_class: illuminance
 
+    minimum_luminance:
+      name: "Luminance"
+      description: "The luminance under which the motion lights will tun on."
+
     lights_off:
       name: "Lights to Turn Off"
       selector:
@@ -117,7 +121,7 @@ action:
     - conditions:
         - condition: numeric_state
           entity_id: !input luminance_sensor
-          below: '25'
+          below: !input minimum_luminance
       sequence:
         - choose:
             - conditions:
@@ -144,3 +148,5 @@ action:
               data: {}
               target: !input night_scenes
   default: []
+
+mode: restart
