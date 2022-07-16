@@ -60,7 +60,7 @@ condition: []
 action:
   service: todoist.new_task
   data:
-    content: Replace {{ trigger.from_state.attributes.friendly_name }}
+    content: Replace {{ trigger.entity_id.friendly_name }}
     project: !input todoist_project
     labels: !input todoist_labels
     priority: !input todoist_priority
