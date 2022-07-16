@@ -145,6 +145,8 @@ action:
             - conditions:
                 - condition: time
                   after: !input wake_time
+                - condition: time
+                  before: !input bedtime
               sequence:
                 - service: hue.activate_scene
                   data: {}
