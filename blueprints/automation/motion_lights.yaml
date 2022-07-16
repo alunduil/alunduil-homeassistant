@@ -1,0 +1,145 @@
+blueprint:
+  name: Motion Lights
+  description: |
+    Motion activated lights that dim after the sun sets.
+  domain: automation
+  input:
+    motion_sensor:
+      name: "Motion Sensor"
+      description: "The sensor which triggers the lights."
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    luminance_sensor:
+      name: "Luminance Sensor"
+      description: "The sensor which confirms if the room is lit."
+      selector:
+        entity:
+          domain: sensor
+          device_class: illuminance
+
+    lights_off:
+      name: "Lights to Turn Off"
+      selector:
+        entity:
+          domain: light
+    light_off_delay:
+      name: "Off Delay"
+      description: "Time to wait before turning the lights off after motion clears."
+      selector:
+        duration:
+    light_off_transition:
+      name: "Off Transition"
+      description: "Time to transition the light to off."
+      selector:
+        number:
+          min: 0
+          max: 86400
+          unit_of_measurement: Seconds
+          mode: box
+
+    relax_time_after_sunset:
+      name: "Relax Time"
+      description: "This is the time you want the relax scene to start as number of minutes after sunset."
+      selector:
+        number:
+          min: 0
+          max: 720
+          unit_of_measurement: Minutes
+          mode: box
+    bedtime:
+      name: "Bedtime"
+      description: "When you would like nightlights to start."
+      selector:
+        time:
+    wake_time:
+      name: "Wake-up Time"
+      description: "When nightlights stop."
+      selector:
+        time:
+
+    relax_scenes:
+      name: "Relax Scenes"
+      description: "Hue scenes to use in the evening."
+      selector:
+        target:
+          entity:
+            integration: hue
+            domain: scene
+    bright_scenes:
+      name: "Bright Scenes"
+      description: "Hue scenes to use during the day."
+      selector:
+        target:
+          entity:
+            integration: hue
+            domain: scene
+    night_scenes:
+      name: "Night Scenes"
+      description: "Hue scenes to use for night lights."
+      selector:
+        target:
+          entity:
+            integration: hue
+            domain: scene
+
+trigger:
+  - platform: state
+    entity_id: !input motion_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+
+condition: []
+
+choose:
+  - conditions:
+      - condition: state
+        entity_id: !input motion_sensor
+        state: 'off'
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 0
+      - condition: state
+        entity_id: !input lights_off
+    sequence:
+      - delay: !input light_off_delay
+      - service: light.turn_off
+        data:
+          transition: !input light_off_transition
+        target:
+          entity_id: !input lights_off
+  - conditions:
+      - condition: numeric_state
+        entity_id: !input luminance_sensor
+        below: '25'
+    sequence:
+      - choose:
+          - conditions:
+              - condition: not
+                conditions:
+                  - condition: time
+                    after: !input bedtime
+              - condition: sun
+                after: sunset
+                after_offset: !input relax_time_after_sunset
+            sequence:
+              - service: hue.activate_scene
+                data: {}
+                target: !input relax_scenes
+          - conditions:
+              - condition: time
+                after: !input wake_time
+            sequence:
+              - service: hue.activate_scene
+                data: {}
+                target: !input bright_scenes
+        default:
+          - service: hue.activate_scene
+            data: {}
+            target: !input night_scenes
+default: []
+
