@@ -22,6 +22,12 @@ blueprint:
     minimum_luminance:
       name: "Luminance"
       description: "The luminance under which the motion lights will tun on."
+      selector:
+        number:
+          min: 0
+          max: 1000
+          unit_of_measuremnt: Lux
+          mode: box
 
     lights_off:
       name: "Lights to Turn Off"
