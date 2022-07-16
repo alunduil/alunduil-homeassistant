@@ -141,5 +141,5 @@ choose:
           - service: hue.activate_scene
             data: {}
             target: !input night_scenes
-default: []
+  default: []
 
