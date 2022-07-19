@@ -31,11 +31,6 @@ blueprint:
       name: "Todoist Project"
       selector:
         text:
-    todoist_labels:
-      name: "Todoist Labels"
-      description: "Comma (without spaces) separated list of tags (e.g., foo,bar)."
-      selector:
-        text:
     todoist_priority:
       name: "Todoist Priority"
       description: "A numeric priority where 1 is low priority and 4 is high priority."
@@ -49,6 +44,9 @@ blueprint:
       selector:
         text: 
 
+variables:
+  battery: !input battery
+
 trigger:
   - platform: numeric_state
     entity_id: !input battery
@@ -60,8 +58,7 @@ condition: []
 action:
   service: todoist.new_task
   data:
-    content: Replace {{ trigger.entity_id.friendly_name }}
+    content: Replace {{ battery }}
     project: !input todoist_project
-    labels: !input todoist_labels
     priority: !input todoist_priority
     due_date_string: !input todoist_due_date
