@@ -1,0 +1,148 @@
+blueprint:
+  name: Button Lights
+  description: |
+    Button activated lights that dim after the sun sets.
+  domain: automation
+  input:
+    button:
+      name: "Button"
+      description: "The device which triggers the lights."
+      selector:
+        device:
+          domain: hue
+
+    lights_off:
+      name: "Lights to Turn Off"
+      selector:
+        entity:
+          domain: light
+
+    relax_time_after_sunset:
+      name: "Relax Time"
+      description: "This is the time you want the relax scene to start as number of minutes after sunset."
+      selector:
+        number:
+          min: 0
+          max: 720
+          unit_of_measurement: Minutes
+          mode: box
+    bedtime:
+      name: "Bedtime"
+      description: "When you would like nightlights to start."
+      selector:
+        time:
+    wake_time:
+      name: "Wake-up Time"
+      description: "When nightlights stop."
+      selector:
+        time:
+
+    relax_scenes:
+      name: "Relax Scenes"
+      description: "Hue scenes to use in the evening."
+      selector:
+        target:
+          entity:
+            integration: hue
+            domain: scene
+    bright_scenes:
+      name: "Bright Scenes"
+      description: "Hue scenes to use during the day."
+      selector:
+        target:
+          entity:
+            integration: hue
+            domain: scene
+    night_scenes:
+      name: "Night Scenes"
+      description: "Hue scenes to use for night lights."
+      selector:
+        target:
+          entity:
+            integration: hue
+            domain: scene
+
+trigger:
+  - device_id: !input button
+    domain: hue
+    platform: device
+    type: initial_press
+    subtype: 1
+    unique_id: 40c17d43-58dd-44d0-8cef-e360ccac1647
+    id: pressed
+  - device_id: !input button
+    domain: hue
+    platform: device
+    type: repeat
+    subtype: 1
+    unique_id: 40c17d43-58dd-44d0-8cef-e360ccac1647
+    id: held
+  - device_id: !input button
+    domain: hue
+    platform: device
+    type: short_release
+    subtype: 1
+    unique_id: 40c17d43-58dd-44d0-8cef-e360ccac1647
+    id: released_short
+  - device_id: !input button
+    domain: hue
+    platform: device
+    type: long_release
+    subtype: 1
+    unique_id: 40c17d43-58dd-44d0-8cef-e360ccac1647
+    id: released_long
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: held
+        sequence:
+          - service: hue.activate_scene
+            data: {}
+            target: !input bright_scene
+      - conditions:
+          - condition: trigger
+            id: released_short
+        sequence:
+          - if:
+              - condition: state
+                entity_id: !input lights_off
+                state: "on"
+            then:
+              - service: light.turn_off
+                data: {}
+                target:
+                  entity_id: !input lights_off
+            else:
+              - choose:
+                  - conditions:
+                      - condition: not
+                        conditions:
+                          - condition: time
+                            after: !input bedtime
+                      - condition: sun
+                        after: sunset
+                        after_offset: !input relax_time_after_sunset
+                    sequence:
+                      - service: hue.activate_scene
+                        data: {}
+                        target: !input relax_scenes
+                  - conditions:
+                      - condition: time
+                        after: !input wake_time
+                      - condition: time
+                        before: !input bedtime
+                    sequence:
+                      - service: hue.activate_scene
+                        data: {}
+                        target: !input bright_scenes
+                default:
+                  - service: hue.activate_scene
+                    data: {}
+                    target: !input night_scenes
+    default: []
+
+mode: single

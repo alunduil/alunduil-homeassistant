@@ -53,11 +53,7 @@ blueprint:
       name: "Relax Time"
       description: "This is the time you want the relax scene to start as number of minutes after sunset."
       selector:
-        number:
-          min: 0
-          max: 720
-          unit_of_measurement: Minutes
-          mode: box
+        text:
     bedtime:
       name: "Bedtime"
       description: "When you would like nightlights to start."
