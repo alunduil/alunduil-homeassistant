@@ -102,7 +102,7 @@ action:
         sequence:
           - service: hue.activate_scene
             data: {}
-            target: !input bright_scene
+            target: !input bright_scenes
       - conditions:
           - condition: trigger
             id: released_short
