@@ -9,7 +9,7 @@ blueprint:
       description: "The device which triggers the lights."
       selector:
         device:
-          domain: hue
+          integration: hue
 
     lights_off:
       name: "Lights to Turn Off"
